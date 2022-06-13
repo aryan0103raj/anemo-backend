@@ -6,5 +6,6 @@ const db = {};
 db.mongoose = mongoose;
 
 db.user = require("./user");
+db.blog = require("./blog");
 
 module.exports = db;

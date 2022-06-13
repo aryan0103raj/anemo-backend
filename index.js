@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
+const blogRouter = require("./routes/blog");
 
 var corsOptions = {
   origin: "http://localhost:8081",
@@ -26,6 +27,8 @@ db.mongoose
   })
   .then(() => console.log("Database connected!"))
   .catch((err) => console.log(err));
+
+app.use("/blogs", blogRouter);
 
 app.listen(8080, () => {
   console.log("Server up at 8080");
