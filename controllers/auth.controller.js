@@ -1,6 +1,7 @@
 const config = require("../config/auth.config");
 const db = require("../models");
 const User = db.user;
+const College = db.college;
 
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
@@ -15,14 +16,23 @@ exports.signup = (req, res) => {
     password: bcrypt.hashSync(req.body.password, 8),
   });
 
-  user.save((err, user) => {
-    if (err) {
-      res.status(500).send({ message: err });
-      return;
-    }
+  user
+    .save()
+    .then((result) => {
+      var query = { name: req.body.collegeName },
+        update = { $push: { users: user } },
+        options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
-    res.send({ message: "Registration Successful" });
-  });
+      College.findOneAndUpdate(query, update, options, function (err, result) {
+        if (err) {
+          return res.send({ message: "Error Here" });
+        }
+        res.send({ message: "Registration Successful!" });
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({ err });
+    });
 };
 
 exports.signin = (req, res) => {
