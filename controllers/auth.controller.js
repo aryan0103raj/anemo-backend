@@ -21,7 +21,17 @@ exports.signup = (req, res) => {
       return;
     }
 
-    res.send({ message: "Registration Successful" });
+    var token = jwt.sign({ id: user.id }, config.secret, {
+      expiresIn: 86400,
+    });
+
+    res.status(200).send({
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      university: user.collegeName,
+      accessToken: token,
+    });
   });
 };
 
@@ -55,6 +65,7 @@ exports.signin = (req, res) => {
       id: user._id,
       username: user.username,
       email: user.email,
+      university: user.collegeName,
       accessToken: token,
     });
   });
