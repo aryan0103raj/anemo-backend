@@ -5,7 +5,6 @@ const College = db.college;
 
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
-const { user } = require("../models");
 
 exports.signup = (req, res) => {
   const user = new User({
@@ -27,7 +26,18 @@ exports.signup = (req, res) => {
         if (err) {
           return res.send({ message: "Error Here" });
         }
-        res.send({ message: "Registration Successful!" });
+
+        var token = jwt.sign({ id: user.id }, config.secret, {
+          expiresIn: 86400,
+        });
+
+        res.status(200).send({
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          university: user.collegeName,
+          accessToken: token,
+        });
       });
     })
     .catch((err) => {
@@ -65,6 +75,7 @@ exports.signin = (req, res) => {
       id: user._id,
       username: user.username,
       email: user.email,
+      university: user.collegeName,
       accessToken: token,
     });
   });
