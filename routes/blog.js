@@ -7,11 +7,27 @@ const Blog = db.blog;
 router.get("/", async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.body.userId });
-    const blogs = await Blog.find({ collegeName: user.collegeName });
+    const likedBlogs = await Blog.find({
+      likes: { $elemMatch: { userId: req.body.userId } },
+    });
 
-    res.json(blogs);
+    const temp = [];
+    for (const blog of likedBlogs) {
+      blog.isLiked = true;
+      temp.push(blog._id);
+    }
+
+    const unlikedBlogs = await Blog.find({
+      _id: { $nin: temp },
+    });
+
+    res.json({
+      likedBlogs: likedBlogs,
+      unlikedBlogs: unlikedBlogs,
+    });
   } catch (err) {
-    res.send({ message: "ERROR" });
+    console.log(err);
+    res.send({ err });
   }
 });
 
@@ -50,15 +66,134 @@ router.get("/search/:username", async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.body.userId });
 
-    const blogs = await Blog.find({
+    const likedBlogs = await Blog.find({
       collegeName: user.collegeName,
       username: { $regex: req.params.username },
+      likes: { $elemMatch: { userId: req.body.userId } },
     });
 
-    res.json(blogs);
+    const temp = [];
+    for (const blog of likedBlogs) {
+      blog.isLiked = true;
+      temp.push(blog._id);
+    }
+
+    const unlikedBlogs = await Blog.find({
+      _id: { $nin: temp },
+    });
+
+    res.json({
+      likedBlogs: likedBlogs,
+      unlikedBlogs: unlikedBlogs,
+    });
   } catch (err) {
     res.json(err);
   }
+});
+
+router.post("/add_comment", (req, res) => {
+  User.findOne({ _id: req.body.userId }).exec((err, user) => {
+    Blog.findOneAndUpdate(
+      { _id: req.body.blogId },
+      {
+        $push: {
+          comments: {
+            userId: req.body.userId,
+            username: user.username,
+            comment: req.body.comment,
+          },
+        },
+      },
+      { new: true }
+    ).then(function (blog) {
+      res.status(200).json(blog);
+    });
+  });
+});
+
+router.post("/delete_comment", (req, res) => {
+  User.findOne({ _id: req.body.userId }).exec((err, user) => {
+    Blog.findOneAndUpdate(
+      { _id: req.body.blogId },
+      {
+        $pull: {
+          comments: {
+            _id: req.body.commentId,
+          },
+        },
+      },
+      { new: true },
+      (err, blog) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ message: "Error" });
+        }
+
+        res.json(blog);
+      }
+    );
+  });
+});
+
+router.post("/do_like", (req, res) => {
+  User.findOne({ _id: req.body.userId }).exec((err, user) => {
+    Blog.findOneAndUpdate(
+      { _id: req.body.blogId },
+      {
+        $push: {
+          likes: {
+            userId: req.body.userId,
+            username: user.username,
+          },
+        },
+        $inc: {
+          likesCount: 1,
+        },
+        $set: {
+          isLiked: true,
+        },
+      },
+      { new: true },
+      (err, blog) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ message: "Error" });
+        }
+
+        res.json(blog);
+      }
+    );
+  });
+});
+
+router.post("/undo_like", (req, res) => {
+  User.findOne({ _id: req.body.userId }).exec((err, user) => {
+    Blog.findOneAndUpdate(
+      { _id: req.body.blogId },
+      {
+        $pull: {
+          likes: {
+            userId: req.body.userId,
+          },
+        },
+        $inc: {
+          likesCount: 1,
+        },
+        $set: {
+          isLiked: false,
+        },
+      },
+      { new: true },
+      (err, blog) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ message: "Error" });
+        }
+
+        res.json(blog);
+      }
+    );
+  });
 });
 
 module.exports = router;
