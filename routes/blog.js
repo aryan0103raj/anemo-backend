@@ -4,11 +4,11 @@ const db = require("../models");
 const User = db.user;
 const Blog = db.blog;
 
-router.get("/", async (req, res) => {
+router.get("/:userId", async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.body.userId });
+    const user = await User.findOne({ _id: req.params.userId });
     const likedBlogs = await Blog.find({
-      likes: { $elemMatch: { userId: req.body.userId } },
+      likes: { $elemMatch: { userId: req.params.userId } },
     });
 
     const temp = [];
@@ -21,10 +21,14 @@ router.get("/", async (req, res) => {
       _id: { $nin: temp },
     });
 
-    res.json({
-      likedBlogs: likedBlogs,
-      unlikedBlogs: unlikedBlogs,
+    const blogs = likedBlogs.concat(unlikedBlogs);
+    blogs.sort(function (a, b) {
+      var dateA = new Date(a.createdAt),
+        dateB = new Date(b.createdAt);
+      return dateB - dateA;
     });
+
+    res.json(blogs);
   } catch (err) {
     console.log(err);
     res.send({ err });
@@ -49,6 +53,7 @@ router.post("/new", (req, res) => {
       collegeName: user.collegeName,
       title: req.body.title,
       content: req.body.content,
+      createdAt: Date.now(),
     });
 
     blog.save((err, blog) => {
@@ -62,14 +67,14 @@ router.post("/new", (req, res) => {
   });
 });
 
-router.get("/search/:username", async (req, res) => {
+router.get("/search/:username/:userId", async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.body.userId });
+    const user = await User.findOne({ _id: req.params.userId });
 
     const likedBlogs = await Blog.find({
       collegeName: user.collegeName,
       username: { $regex: req.params.username },
-      likes: { $elemMatch: { userId: req.body.userId } },
+      likes: { $elemMatch: { userId: req.params.userId } },
     });
 
     const temp = [];
@@ -82,10 +87,9 @@ router.get("/search/:username", async (req, res) => {
       _id: { $nin: temp },
     });
 
-    res.json({
-      likedBlogs: likedBlogs,
-      unlikedBlogs: unlikedBlogs,
-    });
+    const blogs = likedBlogs.concat(unlikedBlogs);
+
+    res.json(blogs);
   } catch (err) {
     res.json(err);
   }

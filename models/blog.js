@@ -5,13 +5,13 @@ const commentSchema = new Schema({
   userId: String,
   username: String,
   comment: { type: String, trim: true },
-  createdAt: { type: Date, default: Date.now(), select: false },
+  createdAt: { type: Date, default: Date.now() },
 });
 
 const likeSchema = new Schema({
   userId: String,
   username: String,
-  createdAt: { type: Date, default: Date.now(), select: false },
+  createdAt: { type: Date, default: Date.now() },
 });
 
 const blogSchema = new Schema({
@@ -28,7 +28,6 @@ const blogSchema = new Schema({
   createdAt: {
     type: Date,
     default: Date.now(),
-    select: false,
   },
   comments: [commentSchema],
   likes: [likeSchema],
