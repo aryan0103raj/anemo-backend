@@ -88,6 +88,11 @@ router.get("/search/:username/:userId", async (req, res) => {
     });
 
     const blogs = likedBlogs.concat(unlikedBlogs);
+    blogs.sort(function (a, b) {
+      var dateA = new Date(a.createdAt),
+        dateB = new Date(b.createdAt);
+      return dateB - dateA;
+    });
 
     res.json(blogs);
   } catch (err) {
