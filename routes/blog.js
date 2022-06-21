@@ -6,17 +6,14 @@ const Blog = db.blog;
 
 router.get("/:userId", async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.params.userId });
     const likedBlogs = await Blog.find({
       likes: { $elemMatch: { userId: req.params.userId } },
     });
-
     const temp = [];
     for (const blog of likedBlogs) {
       blog.isLiked = true;
       temp.push(blog._id);
     }
-
     const unlikedBlogs = await Blog.find({
       _id: { $nin: temp },
     });
@@ -88,6 +85,11 @@ router.get("/search/:username/:userId", async (req, res) => {
     });
 
     const blogs = likedBlogs.concat(unlikedBlogs);
+    blogs.sort(function (a, b) {
+      var dateA = new Date(a.createdAt),
+        dateB = new Date(b.createdAt);
+      return dateB - dateA;
+    });
 
     res.json(blogs);
   } catch (err) {
