@@ -6,17 +6,14 @@ const Blog = db.blog;
 
 router.get("/:userId", async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.params.userId });
     const likedBlogs = await Blog.find({
       likes: { $elemMatch: { userId: req.params.userId } },
     });
-
     const temp = [];
     for (const blog of likedBlogs) {
       blog.isLiked = true;
       temp.push(blog._id);
     }
-
     const unlikedBlogs = await Blog.find({
       _id: { $nin: temp },
     });
@@ -158,9 +155,6 @@ router.post("/do_like", (req, res) => {
         $inc: {
           likesCount: 1,
         },
-        $set: {
-          isLiked: true,
-        },
       },
       { new: true },
       (err, blog) => {
@@ -186,10 +180,7 @@ router.post("/undo_like", (req, res) => {
           },
         },
         $inc: {
-          likesCount: 1,
-        },
-        $set: {
-          isLiked: false,
+          likesCount: -1,
         },
       },
       { new: true },
