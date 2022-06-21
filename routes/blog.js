@@ -153,9 +153,6 @@ router.post("/do_like", (req, res) => {
         $inc: {
           likesCount: 1,
         },
-        $set: {
-          isLiked: true,
-        },
       },
       { new: true },
       (err, blog) => {
@@ -164,6 +161,7 @@ router.post("/do_like", (req, res) => {
           return res.status(500).json({ message: "Error" });
         }
 
+        blog.isLiked = true;
         res.json(blog);
       }
     );
@@ -181,10 +179,7 @@ router.post("/undo_like", (req, res) => {
           },
         },
         $inc: {
-          likesCount: 1,
-        },
-        $set: {
-          isLiked: false,
+          likesCount: -1,
         },
       },
       { new: true },
@@ -194,6 +189,7 @@ router.post("/undo_like", (req, res) => {
           return res.status(500).json({ message: "Error" });
         }
 
+        blog.isLiked = false;
         res.json(blog);
       }
     );
