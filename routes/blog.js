@@ -6,6 +6,7 @@ const Blog = db.blog;
 
 router.get("/:userId", async (req, res) => {
   try {
+    const user = await User.find({ userId: req.params.userId });
     const likedBlogs = await Blog.find({
       likes: { $elemMatch: { userId: req.params.userId } },
     });
@@ -16,6 +17,7 @@ router.get("/:userId", async (req, res) => {
     }
     const unlikedBlogs = await Blog.find({
       _id: { $nin: temp },
+      collegeName: user.collegeName,
     });
 
     const blogs = likedBlogs.concat(unlikedBlogs);
@@ -82,6 +84,7 @@ router.get("/search/:username/:userId", async (req, res) => {
 
     const unlikedBlogs = await Blog.find({
       _id: { $nin: temp },
+      collegeName: user.collegeName,
     });
 
     const blogs = likedBlogs.concat(unlikedBlogs);
