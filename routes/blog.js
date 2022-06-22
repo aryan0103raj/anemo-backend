@@ -6,7 +6,7 @@ const Blog = db.blog;
 
 router.get("/:userId", async (req, res) => {
   try {
-    const user = await User.find({ userId: req.params.userId });
+    const user = await User.findOne({ _id: req.params.userId });
     const likedBlogs = await Blog.find({
       likes: { $elemMatch: { userId: req.params.userId } },
     });
@@ -48,6 +48,7 @@ router.post("/new", (req, res) => {
     }
 
     const blog = new Blog({
+      name: user.name,
       username: user.username,
       collegeName: user.collegeName,
       title: req.body.title,
@@ -72,7 +73,10 @@ router.get("/search/:username/:userId", async (req, res) => {
 
     const likedBlogs = await Blog.find({
       collegeName: user.collegeName,
-      username: { $regex: req.params.username },
+      $or: [
+        { username: { $regex: req.params.username, $options: "i" } },
+        { name: { $regex: req.params.username, $options: "i" } },
+      ],
       likes: { $elemMatch: { userId: req.params.userId } },
     });
 
@@ -85,6 +89,10 @@ router.get("/search/:username/:userId", async (req, res) => {
     const unlikedBlogs = await Blog.find({
       _id: { $nin: temp },
       collegeName: user.collegeName,
+      $or: [
+        { username: { $regex: req.params.username, $options: "i" } },
+        { name: { $regex: req.params.username, $options: "i" } },
+      ],
     });
 
     const blogs = likedBlogs.concat(unlikedBlogs);
