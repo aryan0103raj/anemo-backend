@@ -4,6 +4,7 @@ const cors = require("cors");
 const app = express();
 const blogRouter = require("./routes/blog");
 const profileRouter = require("./routes/profile");
+const findRouter = require("./routes/find");
 
 var corsOptions = {
   origin: "http://localhost:3000",
@@ -31,6 +32,7 @@ db.mongoose
 
 app.use("/blogs", blogRouter);
 app.use("/profile", profileRouter);
+app.use("/find", findRouter);
 
 app.listen(8080, () => {
   console.log("Server up at 8080");
