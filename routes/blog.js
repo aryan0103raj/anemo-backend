@@ -72,12 +72,16 @@ router.get("/search/:username/:userId", async (req, res) => {
     const user = await User.findOne({ _id: req.params.userId });
 
     const likedBlogs = await Blog.find({
-      collegeName: user.collegeName,
-      $or: [
-        { username: { $regex: req.params.username, $options: "i" } },
-        { name: { $regex: req.params.username, $options: "i" } },
+      $and: [
+        { collegeName: user.collegeName },
+        {
+          $or: [
+            { username: { $regex: req.params.username, $options: "i" } },
+            { name: { $regex: req.params.username, $options: "i" } },
+          ],
+        },
+        { likes: { $elemMatch: { userId: req.params.userId } } },
       ],
-      likes: { $elemMatch: { userId: req.params.userId } },
     });
 
     const temp = [];
@@ -87,11 +91,15 @@ router.get("/search/:username/:userId", async (req, res) => {
     }
 
     const unlikedBlogs = await Blog.find({
-      _id: { $nin: temp },
-      collegeName: user.collegeName,
-      $or: [
-        { username: { $regex: req.params.username, $options: "i" } },
-        { name: { $regex: req.params.username, $options: "i" } },
+      $and: [
+        { _id: { $nin: temp } },
+        { collegeName: user.collegeName },
+        {
+          $or: [
+            { username: { $regex: req.params.username, $options: "i" } },
+            { name: { $regex: req.params.username, $options: "i" } },
+          ],
+        },
       ],
     });
 

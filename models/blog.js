@@ -15,6 +15,7 @@ const likeSchema = new Schema({
 });
 
 const blogSchema = new Schema({
+  name: String,
   username: String,
   collegeName: String,
   title: {

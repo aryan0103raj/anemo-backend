@@ -10,8 +10,8 @@ const userSchema = new Schema({
   bio: String,
   specialization: String,
   grad_year: Date,
-  connect: [String],
-  skills: [String],
+  connect: String,
+  skills: String,
 });
 
 module.exports = mongoose.model("User", userSchema);
