@@ -20,7 +20,7 @@ router.get(
       .populate("user1", "name username")
       .populate("user2", "name username");
 
-    res.send(messages);
+    res.json(messages);
   })
 );
 
@@ -53,7 +53,7 @@ router.post(
         { new: true }
       );
 
-      res.send(pushedMessage);
+      res.json(pushedMessage);
     } else {
       var data = {
         user1: req.body.user1,
