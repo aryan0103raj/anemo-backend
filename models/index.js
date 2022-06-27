@@ -8,5 +8,6 @@ db.mongoose = mongoose;
 db.user = require("./user");
 db.blog = require("./blog");
 db.college = require("./college");
+db.message = require("./message");
 
 module.exports = db;

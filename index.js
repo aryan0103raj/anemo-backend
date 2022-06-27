@@ -5,6 +5,17 @@ const app = express();
 const blogRouter = require("./routes/blog");
 const profileRouter = require("./routes/profile");
 const findRouter = require("./routes/find");
+const messageRouter = require("./routes/message");
+const Pusher = require("pusher");
+const message = require("./models/message");
+
+const pusher = new Pusher({
+  appId: "1429086",
+  key: "fa9ed026dede4902b34e",
+  secret: "bb5c30700acff73b06c0",
+  cluster: "ap2",
+  useTLS: true,
+});
 
 var corsOptions = {
   origin: "http://localhost:3000",
@@ -30,9 +41,32 @@ db.mongoose
   .then(() => console.log("Database connected!"))
   .catch((err) => console.log(err));
 
+const DB = mongoose.connection;
+DB.once("open", () => {
+  console.log("DB.ONCE()");
+  const msgCollection = DB.collection("messages");
+  const changeStream = msgCollection.watch();
+
+  changeStream.on("change", (change) => {
+    if (change.operationType === "insert") {
+      const messageDetails = change.fullDocument;
+      pusher.trigger("messages", "inserted", messageDetails);
+    } else if (change.operationType === "update") {
+      const messageDetails = change;
+      pusher.trigger("messages", "updated", {
+        _id: messageDetails.documentKey._id,
+        messages: messageDetails.updateDescription.updatedFields.chats,
+      });
+    } else {
+      console.log("Error Triggering Pusher");
+    }
+  });
+});
+
 app.use("/blogs", blogRouter);
 app.use("/profile", profileRouter);
 app.use("/find", findRouter);
+app.use("/messages", messageRouter);
 
 app.listen(8080, () => {
   console.log("Server up at 8080");
