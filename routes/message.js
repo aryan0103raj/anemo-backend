@@ -11,6 +11,19 @@ const asyncHandler = (fn) => {
   };
 };
 
+router.get(
+  "/:userId",
+  asyncHandler(async (req, res, next) => {
+    const messages = await Message.find({
+      $or: [{ user1: req.params.userId }, { user2: req.params.userId }],
+    })
+      .populate("user1", "name username")
+      .populate("user2", "name username");
+
+    res.send(messages);
+  })
+);
+
 router.post(
   "/send",
   asyncHandler(async (req, res, next) => {
@@ -26,13 +39,19 @@ router.post(
 
     if (roomExists) {
       const pushedMessage = await Message.findOneAndUpdate(
-        { $or: [{ user1: req.body.sender }, { user2: req.body.sender }] },
+        {
+          $or: [
+            { $and: [{ user1: req.body.user1 }, { user2: req.body.user2 }] },
+            { $and: [{ user1: req.body.user2 }, { user2: req.body.user1 }] },
+          ],
+        },
         {
           $addToSet: {
             chats: { sender: req.body.sender, message: req.body.message },
           },
-        }
-      ).populate("user1", "name username");
+        },
+        { new: true }
+      );
 
       res.send(pushedMessage);
     } else {
@@ -46,19 +65,6 @@ router.post(
 
       res.json(savedRoom);
     }
-  })
-);
-
-router.get(
-  "/:userId",
-  asyncHandler(async (req, res, next) => {
-    const messages = await Message.find({
-      $or: [{ user1: req.params.userId }, { user2: req.params.userId }],
-    })
-      .populate("user1", "name username")
-      .populate("user2", "name username");
-
-    res.send(messages);
   })
 );
 
