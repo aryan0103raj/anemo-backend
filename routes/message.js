@@ -14,8 +14,25 @@ const asyncHandler = (fn) => {
 router.get(
   "/:userId",
   asyncHandler(async (req, res, next) => {
-    const messages = await Message.find({
+    const messages = await Message.find(
+      {
+        $or: [{ user1: req.params.userId }, { user2: req.params.userId }],
+      },
+      "user1 user2"
+    )
+      .populate("user1", "name username")
+      .populate("user2", "name username");
+
+    res.json(messages);
+  })
+);
+
+router.get(
+  "/:userId/:chatId",
+  asyncHandler(async (req, res, next) => {
+    const messages = await Message.findOne({
       $or: [{ user1: req.params.userId }, { user2: req.params.userId }],
+      _id: req.params.chatId,
     })
       .populate("user1", "name username")
       .populate("user2", "name username");
