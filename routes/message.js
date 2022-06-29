@@ -43,7 +43,7 @@ router.get(
       .populate("user1", "name username")
       .populate("user2", "name username");
 
-    messages.chats.reverse();
+    messages && messages.chats.reverse();
     res.json(messages);
   })
 );
