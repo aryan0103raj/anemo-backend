@@ -28,11 +28,17 @@ router.get(
 );
 
 router.get(
-  "/:userId/:chatId",
+  "/:user1Id/:user2Id",
   asyncHandler(async (req, res, next) => {
     const messages = await Message.findOne({
-      $or: [{ user1: req.params.userId }, { user2: req.params.userId }],
-      _id: req.params.chatId,
+      $or: [
+        {
+          $and: [{ user1: req.params.user1Id }, { user2: req.params.user2Id }],
+        },
+        {
+          $and: [{ user1: req.params.user2Id }, { user2: req.params.user1Id }],
+        },
+      ],
     })
       .populate("user1", "name username")
       .populate("user2", "name username");
