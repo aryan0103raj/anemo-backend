@@ -12,7 +12,7 @@ const asyncHandler = (fn) => {
 };
 
 router.get(
-  "/:userId",
+  "/get/:userId",
   asyncHandler(async (req, res, next) => {
     const messages = await Message.find(
       {
@@ -43,7 +43,7 @@ router.get(
       .populate("user1", "name username")
       .populate("user2", "name username");
 
-    messages && messages.chats.reverse();
+    messages && messages.chats;
     res.json(messages);
   })
 );
@@ -91,5 +91,73 @@ router.post(
     }
   })
 );
+
+router.get("/:userId", async (req, res) => {
+  try {
+    const myuser = await User.findOne({ _id: req.params.userId });
+
+    const query = {
+      collegeName: myuser.collegeName,
+    };
+
+    if (
+      new Date(req.query.grad_year).getFullYear() != new Date(0).getFullYear()
+    ) {
+      query.$expr = {
+        $eq: [{ $year: "$grad_year" }, req.query.grad_year],
+      };
+    }
+
+    if (req.query.specialization) {
+      query.specialization = {
+        $regex: req.query.specialization,
+        $options: "i",
+      };
+    }
+
+    if (req.query.username) {
+      query.$or = [
+        { username: { $regex: req.query.username, $options: "i" } },
+        { name: { $regex: req.query.username, $options: "i" } },
+      ];
+    }
+
+    User.find(query, "name username", async function (err, users) {
+      let result = [];
+
+      for (const user of users) {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ message: "Error" });
+        }
+
+        const messages = await Message.find(
+          {
+            $or: [
+              {
+                $and: [{ user1: req.params.userId }, { user2: user._id }],
+              },
+              {
+                $and: [{ user1: user._id }, { user2: req.params.userId }],
+              },
+            ],
+          },
+          "user1 user2"
+        )
+          .populate("user1", "name username")
+          .populate("user2", "name username");
+
+        messages.length === 0 &&
+          user._id.toString() !== req.params.userId &&
+          result.push(user);
+      }
+
+      res.json(result);
+    });
+  } catch (err) {
+    console.log(err);
+    res.send({ err });
+  }
+});
 
 module.exports = router;
