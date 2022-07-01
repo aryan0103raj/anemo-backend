@@ -48,14 +48,19 @@ DB.once("open", () => {
   const changeStream = msgCollection.watch();
 
   changeStream.on("change", (change) => {
-    if (change.operationType === "insert") {
+    /*if (change.operationType === "insert") {
       const messageDetails = change.fullDocument;
-      pusher.trigger("messages", "inserted", messageDetails);
-    } else if (change.operationType === "update") {
+      pusher.trigger(
+        "private" + messageDetails.documentKey._id,
+        "inserted",
+        messageDetails
+      );
+    } else */ if (change.operationType === "update") {
+      console.log("hi");
       const messageDetails = change;
-      pusher.trigger("messages", "updated", {
+      pusher.trigger("private" + messageDetails.documentKey._id, "updated", {
         _id: messageDetails.documentKey._id,
-        messages: messageDetails.updateDescription.updatedFields.chats,
+        chats: messageDetails.updateDescription.updatedFields.chats,
       });
     } else {
       console.log("Error Triggering Pusher");
@@ -63,20 +68,20 @@ DB.once("open", () => {
   });
 });
 
-const initUnhandledExceptions = () => {
-  process.on("unhandledRejection", (err) => {
-    console.log(err.name, err.message);
-    console.log("UNHANDLED REJECTION! Shutting down...");
-    process.exit(1);
-  });
+// const initUnhandledExceptions = () => {
+//   process.on("unhandledRejection", (err) => {
+//     console.log(err.name, err.message);
+//     console.log("UNHANDLED REJECTION! Shutting down...");
+//     process.exit(1);
+//   });
 
-  process.on("uncaughtException", (err) => {
-    console.log(err.name, err.message);
-    console.log("UNCAUGHT EXCEPTION!  Shutting down...");
-    process.exit(1);
-  });
-};
-initUnhandledExceptions();
+//   process.on("uncaughtException", (err) => {
+//     console.log(err.name, err.message);
+//     console.log("UNCAUGHT EXCEPTION!  Shutting down...");
+//     process.exit(1);
+//   });
+// };
+// initUnhandledExceptions();
 
 app.use("/blogs", blogRouter);
 app.use("/profile", profileRouter);
