@@ -9,5 +9,6 @@ db.user = require("./user");
 db.blog = require("./blog");
 db.college = require("./college");
 db.message = require("./message");
+db.room = require("./room");
 
 module.exports = db;

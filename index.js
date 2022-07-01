@@ -5,7 +5,7 @@ const app = express();
 const blogRouter = require("./routes/blog");
 const profileRouter = require("./routes/profile");
 const findRouter = require("./routes/find");
-const messageRouter = require("./routes/messages");
+const messageRouter = require("./routes/message");
 const Pusher = require("pusher");
 const message = require("./models/message");
 
