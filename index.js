@@ -50,12 +50,17 @@ DB.once("open", () => {
   changeStream.on("change", (change) => {
     if (change.operationType === "insert") {
       const messageDetails = change.fullDocument;
-      pusher.trigger("messages", "inserted", messageDetails);
+      pusher.trigger(
+        "private" + messageDetails.documentKey._id,
+        "inserted",
+        messageDetails
+      );
     } else if (change.operationType === "update") {
+      console.log("hi");
       const messageDetails = change;
-      pusher.trigger("messages", "updated", {
+      pusher.trigger("private" + messageDetails.documentKey._id, "updated", {
         _id: messageDetails.documentKey._id,
-        messages: messageDetails.updateDescription.updatedFields.chats,
+        chats: messageDetails.updateDescription.updatedFields.chats,
       });
     } else {
       console.log("Error Triggering Pusher");
