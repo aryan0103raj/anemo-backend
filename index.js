@@ -48,14 +48,14 @@ DB.once("open", () => {
   const changeStream = msgCollection.watch();
 
   changeStream.on("change", (change) => {
-    /*if (change.operationType === "insert") {
+    if (change.operationType === "insert") {
       const messageDetails = change.fullDocument;
       pusher.trigger(
         "private" + messageDetails.documentKey._id,
         "inserted",
         messageDetails
       );
-    } else */ if (change.operationType === "update") {
+    } else if (change.operationType === "update") {
       console.log("hi");
       const messageDetails = change;
       pusher.trigger("private" + messageDetails.documentKey._id, "updated", {
