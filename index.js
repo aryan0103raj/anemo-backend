@@ -146,7 +146,11 @@ app.get("/pic/:userId", async (req, res) => {
 
 app.delete("/deletePic/:userId", async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.params.userId });
+    const user = await User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $set: { profilePicture: "" } },
+      { new: true }
+    );
     await gfs.files.deleteOne({ filename: user.profilePicture });
     res.send("Success");
   } catch (error) {
