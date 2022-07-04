@@ -38,6 +38,12 @@ router.get(
       .populate("user1", "name username")
       .populate("chatList.user2", "name username");
 
+    userChatList.chatList.sort(function (a, b) {
+      var dateA = new Date(a.lastUpdate),
+        dateB = new Date(b.lastUpdate);
+      return dateB - dateA;
+    });
+
     res.json(userChatList);
   })
 );
@@ -54,6 +60,20 @@ router.get(
           $and: [{ user1: req.params.user2Id }, { user2: req.params.user1Id }],
         },
       ],
+    })
+      .populate("user1", "name username")
+      .populate("user2", "name username");
+
+    messages && messages.chats;
+    res.json(messages);
+  })
+);
+
+router.get(
+  "/:chatId",
+  asyncHandler(async (req, res, next) => {
+    const messages = await Message.findOne({
+      _id: req.params.chatId,
     })
       .populate("user1", "name username")
       .populate("user2", "name username");
