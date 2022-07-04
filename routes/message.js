@@ -57,7 +57,7 @@ router.get(
           $and: [{ user1: req.params.user1Id }, { user2: req.params.user2Id }],
         },
         {
-          $and: [{ user1: req.params.user2Id }, { user2: req.params.user1Id }],
+          $and: [{ user1: req.params.user2Id }, { users2: req.params.user1Id }],
         },
       ],
     })

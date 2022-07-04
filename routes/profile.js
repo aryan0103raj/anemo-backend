@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const upload = require("../middlewares/upload");
 const db = require("../models");
 const User = db.user;
 const Blog = db.blog;
@@ -68,6 +69,31 @@ router.get("/myblogs/:userId", async (req, res) => {
     res.json(blogs);
   } catch (err) {
     res.json(err);
+  }
+});
+
+router.post("/upload/:userId", upload.single("file"), async (req, res) => {
+  try {
+    console.log(req.file);
+
+    const user = await User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $set: { profilePicture: req.file.filename } },
+      { new: true }
+    );
+
+    if (req.file == undefined) {
+      return res.send({
+        message: "You must select a file.",
+      });
+    }
+
+    return res.json(user);
+  } catch (error) {
+    console.log(error);
+    return res.send({
+      message: "Error when trying upload image: ${error}",
+    });
   }
 });
 

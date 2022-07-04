@@ -8,6 +8,9 @@ const findRouter = require("./routes/find");
 const messageRouter = require("./routes/message");
 const Pusher = require("pusher");
 const message = require("./models/message");
+const Grid = require("gridfs-stream");
+const MODEL = require("./models");
+const User = MODEL.user;
 
 const pusher = new Pusher({
   appId: "1429086",
@@ -41,47 +44,100 @@ db.mongoose
   .then(() => console.log("Database connected!"))
   .catch((err) => console.log(err));
 
+let gfs;
+
 const DB = mongoose.connection;
 DB.once("open", () => {
-  console.log("DB.ONCE()");
-  const msgCollection = DB.collection("messages");
-  const changeStream = msgCollection.watch();
+  gridfsBucket = new mongoose.mongo.GridFSBucket(DB.db, {
+    bucketName: "photos",
+  });
+  gfs = Grid(DB.db, mongoose.mongo);
+  gfs.collection("photos");
 
-  changeStream.on("change", (change) => {
-    if (change.operationType === "insert") {
-      const messageDetails = change.fullDocument;
-      pusher.trigger(
-        "private" + messageDetails.documentKey._id,
-        "inserted",
-        messageDetails
-      );
-    } else if (change.operationType === "update") {
+  const chatListCollection = DB.collection("chatlists");
+  const chatListChangeStream = chatListCollection.watch();
+
+  const msgCollection = DB.collection("messages");
+
+  chatListChangeStream.on("change", async (change) => {
+    const msgChangeStream2 = msgCollection.watch();
+    msgChangeStream2.on("change", (change) => {
+      if (change.operationType === "update") {
+        const messageDetails = change;
+
+        pusher.trigger("private" + messageDetails.documentKey._id, "updated", {
+          _id: messageDetails.documentKey._id,
+          chats: messageDetails.updateDescription.updatedFields.chats,
+        });
+      }
+    });
+
+    if (change.operationType === "update") {
       console.log("hi");
-      const messageDetails = change;
-      pusher.trigger("private" + messageDetails.documentKey._id, "updated", {
-        _id: messageDetails.documentKey._id,
-        chats: messageDetails.updateDescription.updatedFields.chats,
+      const chatDetails = change;
+      const chatList = await db.chatList
+        .findOne({
+          _id: change.documentKey._id,
+        })
+        .populate("user1", "name username")
+        .populate("chatList.user2", "name username");
+      chatList.chatList.sort(function (a, b) {
+        var dateA = new Date(a.lastUpdate),
+          dateB = new Date(b.lastUpdate);
+        return dateB - dateA;
       });
-    } else {
-      console.log("Error Triggering Pusher");
+      console.log(change);
+      pusher.trigger(
+        "private" + chatDetails.documentKey._id,
+        "updated",
+        chatList
+      );
+    } else if (change.operationType === "insert") {
+      const chatDetails = change.fullDocument;
+      const chatList = await db.chatList
+        .findOne({
+          _id: change.documentKey._id,
+        })
+        .populate("user1", "name username")
+        .populate("chatList.user2", "name username");
+
+      chatList.chatList.sort(function (a, b) {
+        var dateA = new Date(a.lastUpdate),
+          dateB = new Date(b.lastUpdate);
+        return dateB - dateA;
+      });
+      console.log(change);
+      pusher.trigger("private" + chatDetails.user1, "inserted", chatList);
     }
   });
 });
 
-// const initUnhandledExceptions = () => {
-//   process.on("unhandledRejection", (err) => {
-//     console.log(err.name, err.message);
-//     console.log("UNHANDLED REJECTION! Shutting down...");
-//     process.exit(1);
-//   });
+const initUnhandledExceptions = () => {
+  process.on("unhandledRejection", (err) => {
+    console.log(err.name, err.message);
+    console.log("UNHANDLED REJECTION! Shutting down...");
+    process.exit(1);
+  });
 
-//   process.on("uncaughtException", (err) => {
-//     console.log(err.name, err.message);
-//     console.log("UNCAUGHT EXCEPTION!  Shutting down...");
-//     process.exit(1);
-//   });
-// };
-// initUnhandledExceptions();
+  process.on("uncaughtException", (err) => {
+    console.log(err.name, err.message);
+    console.log("UNCAUGHT EXCEPTION!  Shutting down...");
+    process.exit(1);
+  });
+};
+initUnhandledExceptions();
+
+app.get("/pic/:userId", async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.params.userId });
+    const file = await gfs.files.findOne({ filename: user.profilePicture });
+    const readStream = gridfsBucket.openDownloadStreamByName(file.filename);
+    readStream.pipe(res);
+  } catch (err) {
+    console.log(err);
+    res.send({ err });
+  }
+});
 
 app.use("/blogs", blogRouter);
 app.use("/profile", profileRouter);

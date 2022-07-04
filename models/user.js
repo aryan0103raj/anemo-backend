@@ -12,6 +12,7 @@ const userSchema = new Schema({
   grad_year: Date,
   connect: String,
   skills: String,
+  profilePicture: String,
 });
 
 module.exports = mongoose.model("User", userSchema);
