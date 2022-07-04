@@ -38,6 +38,12 @@ router.get(
       .populate("user1", "name username")
       .populate("chatList.user2", "name username");
 
+    userChatList.chatList.sort(function (a, b) {
+      var dateA = new Date(a.lastUpdate),
+        dateB = new Date(b.lastUpdate);
+      return dateB - dateA;
+    });
+    
     res.json(userChatList);
   })
 );
@@ -51,7 +57,7 @@ router.get(
           $and: [{ user1: req.params.user1Id }, { user2: req.params.user2Id }],
         },
         {
-          $and: [{ user1: req.params.user2Id }, { user2: req.params.user1Id }],
+          $and: [{ user1: req.params.user2Id }, { users2: req.params.user1Id }],
         },
       ],
     })
