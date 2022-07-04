@@ -131,11 +131,27 @@ app.get("/pic/:userId", async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.userId });
     const file = await gfs.files.findOne({ filename: user.profilePicture });
-    const readStream = gridfsBucket.openDownloadStreamByName(file.filename);
-    readStream.pipe(res);
+
+    if (file) {
+      const readStream = gridfsBucket.openDownloadStreamByName(file.filename);
+      readStream.pipe(res);
+    } else {
+      res.send("No Profile Pic");
+    }
   } catch (err) {
     console.log(err);
     res.send({ err });
+  }
+});
+
+app.delete("/deletePic/:userId", async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.params.userId });
+    await gfs.files.deleteOne({ filename: user.profilePicture });
+    res.send("Success");
+  } catch (error) {
+    console.log(error);
+    res.send("An error occured.");
   }
 });
 
