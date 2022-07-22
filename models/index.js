@@ -10,5 +10,6 @@ db.blog = require("./blog");
 db.college = require("./college");
 db.message = require("./message");
 db.chatList = require("./chatList");
+db.ecommerce = require("./ecomm");
 
 module.exports = db;

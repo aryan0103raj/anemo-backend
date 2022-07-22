@@ -6,6 +6,7 @@ const blogRouter = require("./routes/blog");
 const profileRouter = require("./routes/profile");
 const findRouter = require("./routes/find");
 const messageRouter = require("./routes/message");
+const ecommRouter = require("./routes/ecomm");
 const Pusher = require("pusher");
 const message = require("./models/message");
 const Grid = require("gridfs-stream");
@@ -112,20 +113,20 @@ DB.once("open", () => {
   });
 });
 
-const initUnhandledExceptions = () => {
-  process.on("unhandledRejection", (err) => {
-    console.log(err.name, err.message);
-    console.log("UNHANDLED REJECTION! Shutting down...");
-    process.exit(1);
-  });
+// const initUnhandledExceptions = () => {
+//   process.on("unhandledRejection", (err) => {
+//     console.log(err.name, err.message);
+//     console.log("UNHANDLED REJECTION! Shutting down...");
+//     process.exit(1);
+//   });
 
-  process.on("uncaughtException", (err) => {
-    console.log(err.name, err.message);
-    console.log("UNCAUGHT EXCEPTION!  Shutting down...");
-    process.exit(1);
-  });
-};
-initUnhandledExceptions();
+//   process.on("uncaughtException", (err) => {
+//     console.log(err.name, err.message);
+//     console.log("UNCAUGHT EXCEPTION!  Shutting down...");
+//     process.exit(1);
+//   });
+// };
+// initUnhandledExceptions();
 
 app.get("/pic/:userId", async (req, res) => {
   try {
@@ -163,6 +164,7 @@ app.use("/blogs", blogRouter);
 app.use("/profile", profileRouter);
 app.use("/find", findRouter);
 app.use("/messages", messageRouter);
+app.use("/ecomm", ecommRouter);
 
 app.listen(8080, () => {
   console.log("Server up at 8080");
