@@ -21,7 +21,9 @@ router.post("/addItem", async (req, res) => {
 
   const newItem = new Ecommerce(data);
   const savedItem = await newItem.save();
-  res.json(savedItem);
+
+  const items = await Ecommerce.find({ sellerId: req.body.sellerId });
+  res.json(items);
 });
 
 router.get("/:userId/:category/:title", async (req, res) => {

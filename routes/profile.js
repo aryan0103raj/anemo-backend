@@ -1,9 +1,11 @@
 const express = require("express");
+const { mongoose } = require("../models");
 const router = express.Router();
 const upload = require("../middlewares/upload");
 const db = require("../models");
 const User = db.user;
 const Blog = db.blog;
+const Ecommerce = db.ecommerce;
 
 router.get("/:userId", async (req, res) => {
   try {
@@ -94,6 +96,16 @@ router.post("/upload/:userId", upload.single("file"), async (req, res) => {
     return res.send({
       message: "Error when trying upload image: ${error}",
     });
+  }
+});
+
+router.get("/items/:userId", async (req, res) => {
+  try {
+    const items = await Ecommerce.find({ sellerId: req.params.userId });
+
+    res.json(items);
+  } catch (err) {
+    res.json(err);
   }
 });
 
