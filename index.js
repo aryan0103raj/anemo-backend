@@ -14,10 +14,10 @@ const MODEL = require("./models");
 const User = MODEL.user;
 
 const pusher = new Pusher({
-  appId: "1429086",
-  key: "fa9ed026dede4902b34e",
-  secret: "bb5c30700acff73b06c0",
-  cluster: "ap2",
+  appId: process.env.appId,
+  key: process.env.key,
+  secret: process.env.secret,
+  cluster: process.env.cluster,
   useTLS: true,
 });
 
@@ -27,8 +27,7 @@ var corsOptions = {
 
 app.use(cors(corsOptions));
 
-const uri =
-  "mongodb+srv://aryan:aryan@anemo.3kbza5o.mongodb.net/?retryWrites=true&w=majority";
+const uri = process.env.MONGO_URI;
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
@@ -113,20 +112,20 @@ DB.once("open", () => {
   });
 });
 
-// const initUnhandledExceptions = () => {
-//   process.on("unhandledRejection", (err) => {
-//     console.log(err.name, err.message);
-//     console.log("UNHANDLED REJECTION! Shutting down...");
-//     process.exit(1);
-//   });
+const initUnhandledExceptions = () => {
+  process.on("unhandledRejection", (err) => {
+    console.log(err.name, err.message);
+    console.log("UNHANDLED REJECTION! Shutting down...");
+    process.exit(1);
+  });
 
-//   process.on("uncaughtException", (err) => {
-//     console.log(err.name, err.message);
-//     console.log("UNCAUGHT EXCEPTION!  Shutting down...");
-//     process.exit(1);
-//   });
-// };
-// initUnhandledExceptions();
+  process.on("uncaughtException", (err) => {
+    console.log(err.name, err.message);
+    console.log("UNCAUGHT EXCEPTION!  Shutting down...");
+    process.exit(1);
+  });
+};
+initUnhandledExceptions();
 
 app.get("/pic/:userId", async (req, res) => {
   try {
