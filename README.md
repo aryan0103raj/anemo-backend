@@ -68,15 +68,19 @@ You need to install Node Package Manager(npm).
    ```sh
    npm install
    ```
-4. Enter your Pusher API Key details in `.env`
+5. Enter your Pusher API Key details in `.env`
    ```js
    app_id = 'Your app_id'
    key = 'Your key'
    secret = 'Your secret'
    cluster = 'Your cluster'
-5. Enter the URI of your MongoDB collection in `.env`
+6. Enter the URI of your MongoDB collection in `.env`
    ```js
    MONGO_URI = 'Your URI'
+7. Run the backend server. It runs at localhost:8080
+   ```sh
+   npm start
+   ```
 
 <p align="right">(<a href="#top">Back to top</a>)</p>
 
