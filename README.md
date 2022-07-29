@@ -3,7 +3,7 @@
 
 <div id="top"></div>
 This repository contains the code for the backend of the app.\
-The code for the fronted can be found [here](https://github.com/rahash72/anemo-frontend).\
+The code for the fronted can be found [here](https://github.com/rahash72/anemo-frontend).
 
 <details>
   <summary>Table of Contents</summary>
