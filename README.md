@@ -2,9 +2,11 @@
 ### Your Campus, Right Away!
 
 <div id="top"></div>
-This repository contains the code for the backend of the app.\
-The code for the fronted can be found [here](https://github.com/rahash72/anemo-frontend).
+This repository contains the code for the backend of the app.
+<br />
+The code for the fronted can be found at (https://github.com/rahash72/anemo-frontend).
 
+<br /><br />
 <details>
   <summary>Table of Contents</summary>
   <ol>
@@ -26,7 +28,7 @@ The code for the fronted can be found [here](https://github.com/rahash72/anemo-f
 
 ## About the Project
 
-Anemo has been designed with the purpose of helping students in a campus connect with each other.\
+Anemo has been designed with the purpose of helping students in a campus connect with each other.<br />
 - It gives you the feature of an inclusive micro-blogging site where you can add your own posts and also interact with
 the posts of other students by liking and commenting on them.
 - You can find another student of your campus on the app and have a realtime one-to-one chat with him/her. You can
@@ -42,6 +44,8 @@ personalize your profile by adding details of yourself, as well as a profile pic
 * [![MongoDB][MongoDB]][MongoDB-url]
 * [![Pusher][Pusher]][Pusher-url]
 
+<p align="right">(<a href="#top">Back to top</a>)</p>
+
 ## Getting Started
 
 ### Prerequisites
@@ -54,7 +58,25 @@ You need to install Node Package Manager(npm).
   
 ### Installation
 
-BBBBBBBBBBB
+1. Get a free API Key at [Pusher](https://pusher.com/)
+2. Create a new MongoDB collection at [MongoDB](https://www.mongodb.com/)
+3. Clone the repo
+   ```sh
+   git clone https://github.com/github_username/repo_name.git
+   ```
+4. Install NPM packages
+   ```sh
+   npm install
+   ```
+4. Enter your Pusher API Key details in `.env`
+   ```js
+   app_id = 'Your app_id'
+   key = 'Your key'
+   secret = 'Your secret'
+   cluster = 'Your cluster'
+5. Enter the URI of your MongoDB collection in `.env`
+   ```js
+   MONGO_URI = 'Your URI'
 
 <p align="right">(<a href="#top">Back to top</a>)</p>
 
